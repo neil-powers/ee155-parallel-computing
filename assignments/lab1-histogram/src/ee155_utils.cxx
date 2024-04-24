@@ -1,17 +1,16 @@
-#include <iostream>
-#include <cmath>
 #include "ee155_utils.hxx"
+#include <cmath>
+#include <iostream>
 using namespace std;
 
-std::chrono::time_point<std::chrono::high_resolution_clock> start_time () {
+std::chrono::time_point<std::chrono::high_resolution_clock> start_time() {
     return (std::chrono::high_resolution_clock::now());
 }
 
-long int delta_usec
-	(std::chrono::time_point<std::chrono::high_resolution_clock> start) {
+long int delta_usec(std::chrono::time_point<std::chrono::high_resolution_clock> start) {
     std::chrono::time_point<std::chrono::high_resolution_clock>
-		end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double, std::ratio<1, 1000000> > elapsed_us=end-start;
+        end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::ratio<1, 1000000>> elapsed_us = end - start;
     long int ticks_us = elapsed_us.count();
     return (ticks_us);
 }
@@ -44,7 +43,7 @@ long int delta_usec
 // Assign a thread to a particular "core" (really, to a logical core, where
 // the two threads in a single hyperthreaded core each count as a separate
 // "core").
-void assign_to_core (std::thread::native_handle_type th_handle, int i) {
+void assign_to_core(std::thread::native_handle_type th_handle, int i) {
 #if !defined(_WIN32)
     // Ensure we don't try to assign to thread #10 if there are only 8 cores.
     int n_cores = thread::hardware_concurrency();
@@ -55,11 +54,14 @@ void assign_to_core (std::thread::native_handle_type th_handle, int i) {
     CPU_SET(i, &cpuset);
     int err = pthread_setaffinity_np(th_handle, sizeof(cpu_set_t), &cpuset);
     if (err != 0) {
-	string str="???";
-	if (err==EFAULT) str = "EFAULT";
-	if (err==EINVAL) str = "EINVAL";
-	if (err==ESRCH ) str = "ESRCH";
-	DIE ("Error calling pthread_setaffinity_np: " << str)
+        string str = "???";
+        if (err == EFAULT)
+            str = "EFAULT";
+        if (err == EINVAL)
+            str = "EINVAL";
+        if (err == ESRCH)
+            str = "ESRCH";
+        DIE("Error calling pthread_setaffinity_np: " << str)
     }
 #endif
 }
@@ -67,15 +69,15 @@ void assign_to_core (std::thread::native_handle_type th_handle, int i) {
 // Given a vector of execution times (typically from running the same code
 // multiple times & timing it each time), print statistics: average time and
 // standard deviation. Ignore times[0]; it probably represents a cold cache.
-void analyze_times (string message, vector<double> &times, string units) {
-    double sum=0, sum_sq=0;
+void analyze_times(string message, vector<double> &times, string units) {
+    double sum = 0, sum_sq = 0;
     int n_times = times.size();
-    for (int i=1; i<n_times; ++i) {
-	sum += times[i];
-	sum_sq += times[i] * times[i];
+    for (int i = 1; i < n_times; ++i) {
+        sum += times[i];
+        sum_sq += times[i] * times[i];
     }
-    double mean = sum / (n_times-1),
-	   dev  = sqrt(sum_sq/(n_times-1)-mean*mean);
-    LOG (message << " summary without initial run: mean=" << mean << units
-	 << ", std.dev.=" << dev << ", std.dev/mean = " << dev/mean);
+    double mean = sum / (n_times - 1),
+           dev = sqrt(sum_sq / (n_times - 1) - mean * mean);
+    LOG(message << " summary without initial run: mean=" << mean << units
+                << ", std.dev.=" << dev << ", std.dev/mean = " << dev / mean);
 }
